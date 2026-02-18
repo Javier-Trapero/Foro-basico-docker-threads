@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foro Simple</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .auth-section, .forum-section {
+            display: none;
+        }
+
+        .auth-section.active, .forum-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button.secondary {
+            background: #95a5a6;
+            margin-left: 10px;
+        }
+
+        button.secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .thread {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+
+        .thread h3 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .thread p {
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .thread-meta {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .success {
+            background: #27ae60;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .user-info {
+            background: #ecf0f1;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #createThreadForm {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #ecf0f1;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗨️ Foro Simple</h1>
+        </div>
+
+        <div class="content">
+            <!-- SECCIÓN DE AUTENTICACIÓN -->
+            <div class="auth-section active" id="authSection">
+                <div class="tabs">
+                    <button class="tab active" onclick="showLogin()">Iniciar Sesión</button>
+                    <button class="tab" onclick="showRegister()">Registrarse</button>
+                </div>
+
+                <div id="message"></div>
+
+                <!-- LOGIN -->
+                <div id="loginForm">
+                    <h2>Iniciar Sesión</h2>
+                    <div class="form-group">
+                        <label>Usuario</label>
+                        <input type="text" id="loginUsername" placeholder="usuario123">
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="loginPassword" placeholder="********">
+                    </div>
+                    <button onclick="login()">Entrar</button>
+                </div>
+
+                <!-- REGISTER -->
+                <div id="registerForm" style="display: none;">
+                    <h2>Crear Cuenta</h2>
+                    <div class="form-group">
+                        <label>Usuario</label>
+                        <input type="text" id="registerUsername" placeholder="usuario123">
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="registerPassword" placeholder="********">
+                    </div>
+                    <button onclick="register()">Crear Cuenta</button>
+                </div>
+            </div>
+
+            <!-- SECCIÓN DEL FORO -->
+            <div class="forum-section" id="forumSection">
+                <div class="user-info">
+                    <span>👤 Usuario: <strong id="currentUser"></strong></span>
+                    <button class="secondary" onclick="logout()">Cerrar Sesión</button>
+                </div>
+
+                <div id="forumMessage"></div>
+
+                <!-- CREAR HILO -->
+                <div id="createThreadForm">
+                    <h3>Crear Nuevo Hilo</h3>
+                    <div class="form-group">
+                        <label>Título</label>
+                        <input type="text" id="threadTitle" placeholder="¿De qué quieres hablar?">
+                    </div>
+                    <div class="form-group">
+                        <label>Contenido</label>
+                        <textarea id="threadContent" rows="4" placeholder="Escribe aquí..."></textarea>
+                    </div>
+                    <button onclick="createThread()">Publicar Hilo</button>
+                </div>
+
+                <!-- LISTA DE HILOS -->
+                <h3>Hilos Recientes</h3>
+                <div id="threadsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        let token = localStorage.getItem('token');
+        let username = localStorage.getItem('username');
+
+        if (token && username) {
+            showForum();
+            loadThreads();
+        }
+
+        function showLogin() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.querySelectorAll('.tab')[0].classList.add('active');
+            document.querySelectorAll('.tab')[1].classList.remove('active');
+        }
+
+        function showRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.querySelectorAll('.tab')[0].classList.remove('active');
+            document.querySelectorAll('.tab')[1].classList.add('active');
+        }
+
+        async function register() {
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+
+            if (!username || !password) {
+                showMessage('Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage('¡Cuenta creada! Ahora inicia sesión', 'success');
+                    showLogin();
+                } else {
+                    showMessage(data.error || 'Error al registrar', 'error');
+                }
+            } catch (error) {
+                showMessage('Error de conexión', 'error');
+            }
+        }
+
+        async function login() {
+            const user = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!user || !password) {
+                showMessage('Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    token = data.token;
+                    username = data.user.username;
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('username', username);
+                    showForum();
+                    loadThreads();
+                } else {
+                    showMessage(data.error || 'Credenciales inválidas', 'error');
+                }
+            } catch (error) {
+                showMessage('Error de conexión', 'error');
+            }
+        }
+
+        function logout() {
+            token = null;
+            username = null;
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            document.getElementById('authSection').classList.add('active');
+            document.getElementById('forumSection').classList.remove('active');
+            showMessage('Sesión cerrada', 'success');
+        }
+
+        function showForum() {
+            document.getElementById('authSection').classList.remove('active');
+            document.getElementById('forumSection').classList.add('active');
+            document.getElementById('currentUser').textContent = username;
+        }
+
+        async function createThread() {
+            const title = document.getElementById('threadTitle').value;
+            const content = document.getElementById('threadContent').value;
+
+            if (!title || !content) {
+                showForumMessage('Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/threads`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ title, content })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showForumMessage('¡Hilo creado!', 'success');
+                    document.getElementById('threadTitle').value = '';
+                    document.getElementById('threadContent').value = '';
+                    loadThreads();
+                } else {
+                    showForumMessage(data.error || 'Error al crear hilo', 'error');
+                }
+            } catch (error) {
+                showForumMessage('Error de conexión', 'error');
+            }
+        }
+
+        async function loadThreads() {
+            try {
+                const response = await fetch(`${API_URL}/threads`);
+                const data = await response.json();
+
+                const threadsList = document.getElementById('threadsList');
+                
+                if (data.threads.length === 0) {
+                    threadsList.innerHTML = '<p style="color: #999; text-align: center;">No hay hilos todavía. ¡Sé el primero en crear uno!</p>';
+                    return;
+                }
+
+                threadsList.innerHTML = data.threads.map(thread => `
+                    <div class="thread">
+                        <h3>${thread.title}</h3>
+                        <p>${thread.content}</p>
+                        <div class="thread-meta">
+                            Por <strong>${thread.author}</strong> • ${new Date(thread.created_at).toLocaleDateString('es-ES')}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                showForumMessage('Error al cargar hilos', 'error');
+            }
+        }
+
+        function showMessage(msg, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="${type}">${msg}</div>`;
+            setTimeout(() => messageDiv.innerHTML = '', 3000);
+        }
+
+        function showForumMessage(msg, type) {
+            const messageDiv = document.getElementById('forumMessage');
+            messageDiv.innerHTML = `<div class="${type}">${msg}</div>`;
+            setTimeout(() => messageDiv.innerHTML = '', 3000);
+        }
+    </script>
+</body>
+</html>

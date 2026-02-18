@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  foro-app:
+    build: .
+    container_name: foro-app
+    ports:
+      - "5000:5000"
+    # elimina el volumen que pisa /app
+    environment:
+      - SECRET_KEY=mi-secreto-cambiar-en-produccion
+    restart: unless-stopped
+
