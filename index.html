@@ -250,6 +250,7 @@
         const API_URL = 'http://localhost:5000/api';
         let token = localStorage.getItem('token');
         let username = localStorage.getItem('username');
+        let isAdmin = localStorage.getItem('is_admin') === 'true';
 
         if (token && username) {
             showForum();
@@ -271,6 +272,7 @@
         }
 
         async function register() {
+            console.log('register() llamado');
             const username = document.getElementById('registerUsername').value;
             const password = document.getElementById('registerPassword').value;
 
@@ -300,6 +302,7 @@
         }
 
         async function login() {
+            console.log('login() llamado');
             const user = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
 
@@ -320,8 +323,12 @@
                 if (response.ok) {
                     token = data.token;
                     username = data.user.username;
+                    isAdmin = data.user.is_admin;
+
                     localStorage.setItem('token', token);
                     localStorage.setItem('username', username);
+                    localStorage.setItem('is_admin', isAdmin ? 'true' : 'false');
+
                     showForum();
                     loadThreads();
                 } else {
@@ -335,8 +342,10 @@
         function logout() {
             token = null;
             username = null;
+            isAdmin = false;
             localStorage.removeItem('token');
             localStorage.removeItem('username');
+            localStorage.removeItem('is_admin');
             document.getElementById('authSection').classList.add('active');
             document.getElementById('forumSection').classList.remove('active');
             showMessage('Sesión cerrada', 'success');
@@ -346,6 +355,19 @@
             document.getElementById('authSection').classList.remove('active');
             document.getElementById('forumSection').classList.add('active');
             document.getElementById('currentUser').textContent = username;
+
+            const container = document.querySelector('.container');
+            const header = document.querySelector('.header');
+
+            if (isAdmin) {
+                container.style.border = '3px solid #e67e22';
+                header.style.background = '#e67e22';
+                header.querySelector('h1').textContent = '🛠️ Foro Simple (ADMIN)';
+            } else {
+                container.style.border = 'none';
+                header.style.background = '#667eea';
+                header.querySelector('h1').textContent = '🗨️ Foro Simple';
+            }
         }
 
         async function createThread() {
