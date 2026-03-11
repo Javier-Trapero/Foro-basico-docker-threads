@@ -2,9 +2,9 @@ name: Foro CI
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "feature/owasp-security" ]
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "feature/owasp-security" ]
 
 jobs:
   test-and-build:
