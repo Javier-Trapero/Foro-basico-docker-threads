@@ -1,6 +1,5 @@
 from app import app, db
 
-
 def test_register_and_login():
     app.config["TESTING"] = True
     app.config["WTF_CSRF_ENABLED"] = False  # desactivar CSRF en tests
@@ -13,13 +12,13 @@ def test_register_and_login():
     # Registro
     resp = client.post(
         "/api/register",
-        json={"username": "testuser", "password": "1234"},
+        json={"username": "testuser", "password": "123456"},
     )
     assert resp.status_code == 201
 
     # Login
     resp = client.post(
         "/api/login",
-        json={"username": "testuser", "password": "1234"},
+        json={"username": "testuser", "password": "123456"},
     )
     assert resp.status_code == 200
