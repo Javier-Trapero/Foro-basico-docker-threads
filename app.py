@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify, send_file
-from flask_bcrypt import Bcrypt
 from flask_jwt_extended import (
     JWTManager,
     create_access_token,
@@ -27,43 +26,35 @@ CSRF_COOKIE_NAME = "csrf_token"
 CSRF_HEADER_NAME = "X-CSRF-Token"
 
 db.init_app(app)
-bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
-
 
 @app.route("/")
 def index():
     return send_file("index.html")
 
-
 # === VALIDACIÓN DE ENTRADAS ===
 
 USERNAME_REGEX = re.compile(r"^[a-zA-Z0-9_.-]{3,20}$")
-
 
 def validate_username(username: str) -> bool:
     if not username:
         return False
     return USERNAME_REGEX.match(username) is not None
 
-
 def validate_password(password: str) -> bool:
     if not password:
         return False
     return 6 <= len(password) <= 50
-
 
 def validate_thread_title(title: str) -> bool:
     if not title:
         return False
     return 3 <= len(title) <= 100
 
-
 def validate_thread_content(content: str) -> bool:
     if not content:
         return False
     return 3 <= len(content) <= 1000
-
 
 # === CABECERAS DE SEGURIDAD Y CSRF COOKIE ===
 
@@ -94,7 +85,6 @@ def add_security_headers_and_csrf_cookie(response):
         )
     return response
 
-
 # === PROTECCIÓN CSRF PARA PETICIONES MODIFICADORAS ===
 
 def csrf_protect(f):
@@ -111,11 +101,10 @@ def csrf_protect(f):
 
     return wrapper
 
-
 # === REGISTRO ===
 @app.route("/api/register", methods=["POST"])
 def register():
-    data = request.get_json()
+    data = request.get_json() or {}
     username = data.get("username")
     password = data.get("password")
 
@@ -131,27 +120,24 @@ def register():
 
     return jsonify({"message": "user created"}), 201
 
-
-
 # === LOGIN ===
 @app.route("/api/login", methods=["POST"])
 @csrf_protect
 def login():
-    data = request.get_json()
+    data = request.get_json() or {}
 
-    username = (data or {}).get("username", "").strip()
-    password = (data or {}).get("password", "")
+    username = data.get("username", "").strip()
+    password = data.get("password", "")
 
     if not validate_username(username) or not validate_password(password):
         return jsonify({"error": "Credenciales inválidas"}), 400
 
     user = User.query.filter_by(username=username).first()
-    if not user or not bcrypt.check_password_hash(user.password_hash, password):
+    if not user or not user.check_password(password):
         return jsonify({"error": "Credenciales inválidas"}), 401
 
     token = create_access_token(identity=user.id)
     return jsonify({"token": token, "user": user.to_dict()}), 200
-
 
 # === HILOS: LISTAR Y CREAR ===
 @app.route("/api/threads", methods=["GET", "POST"])
@@ -162,9 +148,9 @@ def threads():
         return jsonify({"threads": [t.to_dict() for t in threads]}), 200
 
     if request.method == "POST":
-        data = request.get_json()
-        title = (data or {}).get("title", "").strip()
-        content = (data or {}).get("content", "").strip()
+        data = request.get_json() or {}
+        title = data.get("title", "").strip()
+        content = data.get("content", "").strip()
 
         # Validación básica de entrada
         if not validate_thread_title(title) or not validate_thread_content(content):
@@ -188,11 +174,9 @@ def threads():
             }
         ), 201
 
-
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"}), 200
-
 
 if __name__ == "__main__":
     with app.app_context():
