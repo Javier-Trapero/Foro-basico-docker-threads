@@ -1,16 +1,16 @@
 from app import app, db, User
 
+
 def test_register_and_login():
-    # Config especial para entorno de tests
+    # Config especial para tests
     app.config["TESTING"] = True
     app.config["WTF_CSRF_ENABLED"] = False
 
-    client = app.test_client()
-
-    # Limpiamos la base de datos de usuarios de prueba (opcional)
     with app.app_context():
-        User.query.filter_by(username="testuser").delete()
-        db.session.commit()
+        # Creamos todas las tablas necesarias si no existen
+        db.create_all()
+
+    client = app.test_client()
 
     # Registro
     resp = client.post(
