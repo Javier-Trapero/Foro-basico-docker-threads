@@ -114,32 +114,23 @@ def csrf_protect(f):
 
 # === REGISTRO ===
 @app.route("/api/register", methods=["POST"])
-@csrf_protect
 def register():
     data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
 
-    username = (data or {}).get("username", "").strip()
-    password = (data or {}).get("password", "")
+    # Validaciones básicas…
+    if not username or not password:
+        return jsonify({"error": "missing fields"}), 400
 
-    if not validate_username(username) or not validate_password(password):
-        return jsonify({"error": "Datos inválidos"}), 400
-
-    if User.query.filter_by(username=username).first():
-        return jsonify({"error": "Usuario ya existe"}), 409
-
-    hashed = bcrypt.generate_password_hash(password).decode("utf-8")
-    is_admin = username == "admin"
-
-    user = User(
-        username=username,
-        password_hash=hashed,
-        is_admin=is_admin,
-    )
-
+    # Crear usuario en la BD…
+    user = User(username=username)
+    user.set_password(password)
     db.session.add(user)
     db.session.commit()
 
-    return jsonify({"message": "Usuario registrado", "user": user.to_dict()}), 201
+    return jsonify({"message": "user created"}), 201
+
 
 
 # === LOGIN ===
