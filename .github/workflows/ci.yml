@@ -2,9 +2,9 @@ name: Foro CI
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "feature/owasp-security" ]
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "feature/owasp-security" ]
 
 jobs:
   test-and-build:
@@ -25,8 +25,10 @@ jobs:
           pip install -r requirements.txt
       
       - name: Run pytest
+        env:
+          PYTHONPATH: .
         run: |
-          pytest -q
+          python -m pytest -q
 
       - name: Build Docker image
         uses: docker/build-push-action@v5
