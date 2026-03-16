@@ -122,7 +122,6 @@ def register():
 
 # === LOGIN ===
 @app.route("/api/login", methods=["POST"])
-@csrf_protect
 def login():
     data = request.get_json() or {}
 
@@ -138,6 +137,7 @@ def login():
 
     token = create_access_token(identity=user.id)
     return jsonify({"token": token, "user": user.to_dict()}), 200
+
 
 # === HILOS: LISTAR Y CREAR ===
 @app.route("/api/threads", methods=["GET", "POST"])
