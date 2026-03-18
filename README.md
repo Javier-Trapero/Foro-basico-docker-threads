@@ -1,6 +1,3 @@
-Te lo dejo ya formateado en Markdown para que se vea bien en GitHub (con tablas, listas y bloques de código, sin que se junte todo):
-
-text
 # 🚀 Foro básico con Flask, JWT y Docker
 
 Foro minimalista con API REST segura.  
