@@ -122,5 +122,6 @@ Aplicado: @csrf_protect en /api/threads
 
 
 🚀 Próximos pasos
+
 🔒 Más rutas con @jwt_required()
 📊 Logging estructurado + alertas
