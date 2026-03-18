@@ -109,6 +109,7 @@ Patrón: Cookie csrf_token + Header X-CSRF-Token
 # Automático en cada respuesta
 response.set_cookie("csrf_token", secrets.token_hex(16), 
                    httponly=False, samesite="Lax")
+
 # Verificación en POST/PUT/DELETE
 if cookie_token != header_token:
     return 403 "CSRF inválido"
@@ -118,6 +119,7 @@ Aplicado: @csrf_protect en /api/threads
 | Error              | Causa                 | ✅ Solución                                            |
 | ------------------ | --------------------- | -------------------------------------------------------|
 | 404/405 /api/login | Puerto/URL incorrecta | python app.py + http://127.0.0.1:5000/api/login github​ |
+
 
 🚀 Próximos pasos
 🔒 Más rutas con @jwt_required()
